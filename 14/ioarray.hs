@@ -24,12 +24,12 @@ doCollatz n cache =
     where
     cn = collatz n
 
-fstCmp :: Ord a => (b, a) -> (c, a) -> Ordering
-fstCmp (a, b) (c, d) = compare b d
+sndCmp :: Ord a => (b, a) -> (c, a) -> Ordering
+sndCmp (a, b) (c, d) = compare b d
 
 main :: IO ()
 main = do cache <- newArray (1, maxNum) 0 :: IO (IOUArray Int Int)
           writeArray cache 1 1
           mapM (flip doCollatz $ cache) [1..maxNum-1]
           f <- unsafeFreeze cache :: IO (UArray Int Int)
-          print $ fst $ maximumBy fstCmp (assocs f)
+          print $ fst $ maximumBy sndCmp (assocs f)

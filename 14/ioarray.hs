@@ -30,6 +30,6 @@ fstCmp (a, b) (c, d) = compare b d
 main :: IO ()
 main = do cache <- newArray (1, maxNum) 0 :: IO (IOUArray Int Int)
           writeArray cache 1 1
-          mapM (\n -> doCollatz n cache) [1..maxNum-1]
+          mapM (flip doCollatz $ cache) [1..maxNum-1]
           f <- unsafeFreeze cache :: IO (UArray Int Int)
           print $ fst $ maximumBy fstCmp (assocs f)

@@ -1,3 +1,4 @@
+-- requires +RTS -K16M on my computer
 module Main where
 
 import Data.Array.IO
@@ -28,8 +29,8 @@ sndCmp :: Ord a => (b, a) -> (c, a) -> Ordering
 sndCmp (a, b) (c, d) = compare b d
 
 main :: IO ()
-main = do cache <- newArray (1, maxNum) 0 :: IO (IOUArray Int Int)
+main = do cache <- newArray (1, maxNum-1) 0 :: IO (IOUArray Int Int)
           writeArray cache 1 1
-          mapM (flip doCollatz $ cache) [1..maxNum-1]
+          mapM (flip doCollatz $ cache) [1 .. maxNum-1]
           f <- unsafeFreeze cache :: IO (UArray Int Int)
-          print $ fst $ maximumBy sndCmp (assocs f)
+          print $ fst $ maximumBy sndCmp $ assocs f

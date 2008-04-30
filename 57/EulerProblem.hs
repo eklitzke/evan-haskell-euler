@@ -1,39 +1,20 @@
-data Fraction = Fract Int Int
+module Main where
 
-num :: Fraction -> Int
-num Frac n d = n
+data Fraction = Frac Integer Integer
 
-denom :: Fraction -> Int
-denom Frac n d = d
+fracRecip :: Fraction -> Fraction
+fracRecip (Frac n d) = Frac d n
 
--- Remove the first element in a list matching a pattern
-removeFirst :: Eq a => a -> [a] -> [a]
-removeFirst _ []     = []
-removeFirst t (x:xs) = if x == t then xs else x : (removeFirst t xs)
+fracInc :: Fraction -> Fraction
+fracInc (Frac n d) = Frac (n + d) d
 
-reduce :: Fraction -> Fraction
-reduce Frac n d
+magic :: Fraction -> Bool
+magic (Frac n d) = (length $ show n) > (length $ show d)
 
---isReduced :: Fraction -> Bool
+nextFrac :: Fraction -> Fraction
+nextFrac f = fracInc (fracRecip (fracInc f))
 
-fracDiv :: Int -> Fraction -> Fraction
-fracDiv x (Frac n d) = Frac ( 
+fracs :: [Fraction]
+fracs = take 1000 ((Frac 3 2) : [nextFrac f | f <- fracs])
 
-
-multisetDifference :: Eq a => [a] -> [a] -> [a]
-multisetDifference as [] = as
-multisetDifference []  _ = []
-multisetDifference (a:as) bs
-    | a `elem` bs = multisetDifference as (removeFirst a bs)
-    | otherwise   = a : (multisetDifference as bs)
-
--- reduces a fraction. for example, reduceFrac 2 4 = (1, 2)
---reduceFrac :: Integer -> Integer -> (Integer, Integer)
-reduceFrac a b = (product as', product bs')
-    where
-    as  = factor a
-    bs  = factor b
-    as' = multisetDifference as bs
-    bs' = multisetDifference bs as
-
-fracDiv :: 
+main = print $ length $ filter magic fracs

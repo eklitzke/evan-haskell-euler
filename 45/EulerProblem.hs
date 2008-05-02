@@ -1,6 +1,6 @@
 module Main where
 
-import Data.Set hiding (map, filter)
+import Data.IntSet hiding (map, filter)
 
 t = [(n * (n+1)) `div` 2 | n <- [1..]]
 p = [(n * (3*n-1)) `div` 2 | n <- [1..]]

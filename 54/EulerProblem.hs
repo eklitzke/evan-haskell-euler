@@ -7,12 +7,12 @@ import Data.List
 -- Define some card types so that we can compare cards naturally
 
 data Game = Win | Loss | Tie
-data Suit = Hearts | Clubs | Diamonds | Spades deriving (Eq, Ord)
-data Card = Card Int Suit deriving (Eq)
+data Suit = Hearts | Clubs | Diamonds | Spades deriving (Eq, Ord, Show)
+data Card = Card Int Suit deriving (Eq, Show)
 type Hand = [Card]
 type Set  = [Card] -- This is something like a flush or a full house
 type HandSet = (Hand, Set)
-data HandRank = HighCard | OnePair | TwoPair | ThreeKind | Straight | Flush | FullHouse | FourKind | StraightFlush | RoyalFlush deriving (Eq, Ord)
+data HandRank = HighCard | OnePair | TwoPair | ThreeKind | Straight | Flush | FullHouse | FourKind | StraightFlush | RoyalFlush deriving (Eq, Ord, Show)
 
 instance Ord Card where
     compare (Card a b) (Card c d)
@@ -57,21 +57,18 @@ isFlush :: Hand -> Bool
 isFlush (c:cs) = all (== (getSuit c)) (map getSuit cs)
 
 isStraight :: Hand -> Bool
-isStraight h = isStraight' h
+isStraight h = isStraight'$ map getCardInt h
     where
     isStraight' []  = True
     isStraight' [x] = True
     isStraight' (c:c':cs) = (c == (c' - 1)) && (isStraight' (c':cs))
 
-allSameInList :: Eq a => [a] -> Bool
-allSameInList [] = True
-allSameInList (c:cs) = all (== c) cs
-
-
+-- Turn a list into a list of (item, how many times it appeared in the list)
 countSortedList :: Ord a => [a] -> [(a, Int)]
 countSortedList []     = []
 countSortedList (x:xs) = (x, ct) : (countSortedList rm)
     where
+    consume x n []     = (n, [])
     consume x n (y:ys) = if y == x
                             then consume x (n+1) ys 
                             else (n, y:ys)
@@ -82,30 +79,53 @@ countList = countSortedList . sort
 
 getHandRank :: Hand -> HandRank
 getHandRank h
-    | (isFlush h) && ((sort $ map getCardInt h) == [1, 10, 11, 12, 13])
+    | flush_p && ((sort $ map getCardInt h) == [1, 10, 11, 12, 13])
       = RoyalFlush
-    | (isFlush h) && (isStraight h) 
+    | flush_p && straight_p
       = StraightFlush
-    | (allSameInList $ init svals) || (allSameInList $ tail svals) 
+    | any (== 4) (map snd counted)
       = FourKind
     | (length $ nub $ vals) == 2
       = FullHouse
-    | isFlush h
+    | flush_p
       = Flush
-    | isStraight h
+    | straight_p
       = Straight
+    | any (== 3) (map snd counted)
+      = ThreeKind
+    | sort (map snd counted) == [1,2,2]
+      = TwoPair
+    | any (== 3) (map snd counted)
+      = OnePair
+    | otherwise
+      = HighCard
     where
+    straight_p = isStraight h
+    flush_p = isFlush h
+    counted = countList h
     vals = map getCardInt h
     svals = sort vals
 
-pokerHands :: [(HandSet, HandSet)]
-pokerHands = map lineToHands (lines pokerTxt)
+pokerHands :: [(Hand, Hand)]
+pokerHands = map (lineToHands . init) (lines pokerTxt)
     where
     pokerTxt = unsafePerformIO (readFile "poker.txt")
 
-a :: Card
-a = cardRead "4H"
+highCardTieBreaker :: Hand -> Hand -> Bool
+highCardTieBreaker h1 h2 = agt
+    where
+    m1 = maximum $ map getCardInt h1
+    m2 = maximum $ map getCardInt h2
+    (a1, a2) = (m1, maximum [getSuit c | c <- h1, (getCardInt c == m1)])
+    (b1, b2) = (m2, maximum [getSuit c | c <- h2, (getCardInt c == m2)])
+    agt = if a1 > b1 then True else (if a1 == b1 then a2 > b2 else False)
 
-b = cardRead "TD"
+--answer :: Int
+--main = print [(getHandRank a, getHandRank b) | (a, b) <- pokerHands, getHandRank a /= HighCard]
 
-main = print pokerHands
+
+ph = [([Card 1 Spades, Card 2 Spades, Card 3 Spades, Card 4 Spades, Card 5 Spades], [Card 1 Spades, Card 2 Hearts, Card 3 Spades, Card 4 Hearts, Card 5 Spades])]
+
+--main = print pokerHands
+main = print $ 1 + length [(ra, rb) | (a, b) <- pokerHands, let ra = getHandRank a, let rb = getHandRank b, (ra == rb) && (highCardTieBreaker a b)]
+--main = print [(getHandRank a, getHandRank b) | (a, b) <- ph]

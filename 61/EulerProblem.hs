@@ -1,7 +1,10 @@
 module Main where
 
 import Data.Set as S
-import Data.List
+import Data.List as L
+
+fours :: [Int]
+fours = [1000 .. 9999]
 
 makePolygonalSet :: (Int -> Int) -> Set Int
 makePolygonalSet f = fromDistinctAscList $ fourDigits [f n | n <- [1..]]
@@ -15,13 +18,64 @@ hexagonals  = makePolygonalSet (\n -> n * (2*n - 1))
 heptagonals = makePolygonalSet (\n -> (n*(5*n-3)) `div` 2)
 octagonals  = makePolygonalSet (\n -> n * (3*n - 2))
 
+firstAndLast xs = (take 2 $ head xs) == (drop 2 $ last xs)
+
+cyclic (x:y:xs) = ((drop 2 x) == (take 2 y)) && (cyclic (y:xs))
+cyclic _        = True
+
+-- Tests if a list of numbers is cyclic, as defined in the problem
 hasCyclicProperty :: [Int] -> Bool
-hasCyclicProperty ys = hasCyclicProperty' ys
+hasCyclicProperty = hasCyclicProperty' . L.map show
     where
-    firstTwo = take 2 . show
-    lastTwo = drop 2 . show
-    hasCyclicProperty' [x] = lastTwo x == firstTwo (head ys)
-    hasCyclicProperty' (x:x':xs) = (lastTwo x == firstTwo x') && (hasCyclicProperty' (x':xs))
+    hasCyclicProperty' :: [String] -> Bool
+    hasCyclicProperty' xs = (cyclic xs) && (firstAndLast xs)
+
+hasPolygonalProperty :: [Int] -> Bool
+hasPolygonalProperty [a,b,c,d,e,f] = and [ a `S.member` triangles
+                                         , b `S.member` squares
+                                         , c `S.member` pentagonals
+                                         , d `S.member` hexagonals
+                                         , e `S.member` heptagonals
+                                         , f `S.member` octagonals ]
+
+-- Allowable two digit sequences
+allowable :: [Int]
+allowable = [x | x <- [11..99], (x `mod` 10) /= 0]
+
+generateNextCyclic :: Int -> [Int]
+generateNextCyclic x =
+    let lastTwo = (read (drop 2 $ show x)) * 100
+     in [lastTwo + x | x <- allowable]
+
+
+possibleStarts :: [Int] 
+possibleStarts = [a * 100 + b | a <- allowable | b <- allowable]
+
+generateCyclics :: Int -> [[Int]]
+generateCyclics n = generate' 5 n
+    where
+    generate' 0 _ = []
+    generate' n x = map ((++) (map (n:) (generateNextCyclic n))
+
+candidates = [[
+
+map read [
+    let beg = read $ take 2 $ show x
+     in
+         
+    
+    | (read $ take 2 $ show x) < 10 = []
+    | otherwise                     = 
+generateNextCyclic x =
+    where
+
+
+hasBoth f g = \x -> (f x) && (g x)
+
+myList = [[a,b,c,d,e,f] | a <- [1000..9999], b <- [a..9999], c <- [b..9999], d <- [c..9999], e <- [d..9999], f <- [e..9999]]
+
+main = print $ L.filter (hasBoth hasPolygonalProperty hasCyclicProperty) myList
+{-
 
 allSets = triangles `S.union` squares `S.union` pentagonals `S.union` hexagonals `S.union` heptagonals `S.union` octagonals
 
@@ -68,4 +122,5 @@ main = print $ product [S.size s | s <- [pt, ps, pp, px, ph, po]]
     print $ S.size px
     print $ S.size ph
     print $ S.size po
+    -}
     -}

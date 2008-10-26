@@ -2,8 +2,8 @@
 
 module Primes (primesTo100, primesTo10000, isPrime, nextPrime,
                primePowerFactors, -- primeFactors,
-			   fromPrimePowerFactors, isMillerRabinPrime,
-			   isSquareFree, isPrimePower) where
+			   fromPrimePowerFactors, isMillerRabinPrime, isTrialDivisionPrime,
+			   isSquareFree, isPrimePower, primes) where
 
 
 import NumberTheoryFundamentals (divides, splitWith, power)

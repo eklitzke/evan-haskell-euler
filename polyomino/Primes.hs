@@ -2,8 +2,9 @@
 
 module Primes (primesTo100, primesTo10000, isPrime, nextPrime,
                primePowerFactors, -- primeFactors,
-			   fromPrimePowerFactors, isMillerRabinPrime, isTrialDivisionPrime,
-			   isSquareFree, isPrimePower, primes) where
+               trialDivision,
+               fromPrimePowerFactors, isMillerRabinPrime, isTrialDivisionPrime,
+               isMillerRabinPrime', isSquareFree, isPrimePower, primes) where
 
 
 import NumberTheoryFundamentals (divides, splitWith, power)
@@ -73,6 +74,12 @@ isMillerRabinPrime :: Integral a => a -> Bool
 isMillerRabinPrime n
 	| n < 100   = n `elem` primesTo100  -- the test below would not be valid
 	| otherwise = all (isStrongPseudoPrime n (s,t)) primesTo100
+	    where (s,t) = (n-1) `splitWith` 2 -- so n-1 == 2^s * t
+
+isMillerRabinPrime' :: [Int] -> Int -> Bool
+isMillerRabinPrime' plist n
+	| n < 100   = n `elem` primesTo100
+	| otherwise = all (isStrongPseudoPrime n (s,t)) plist
 	    where (s,t) = (n-1) `splitWith` 2 -- so n-1 == 2^s * t
 
 -- to test the algorithm, following set should be empty (replace numbers as required)
